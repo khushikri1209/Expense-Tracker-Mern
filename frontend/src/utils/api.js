@@ -7,9 +7,18 @@ const api = axios.create({
   baseURL: '/api',
 });
 
+// Safely parse stored user data, returning null on any parse error
+const getStoredUser = () => {
+  try {
+    return JSON.parse(localStorage.getItem('user') || 'null');
+  } catch {
+    return null;
+  }
+};
+
 // Request interceptor: attach JWT token to every request if present
 api.interceptors.request.use((config) => {
-  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  const user = getStoredUser();
   if (user && user.token) {
     config.headers.Authorization = `Bearer ${user.token}`;
   }

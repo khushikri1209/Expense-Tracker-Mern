@@ -2,6 +2,9 @@
 
 const Transaction = require('../models/Transaction');
 
+// Helper: validate that a value is a non-empty string
+const isString = (v) => typeof v === 'string' && v.trim().length > 0;
+
 // @desc   Get all transactions for the logged-in user (with optional date filter)
 // @route  GET /api/transactions
 // @access Private
@@ -42,15 +45,20 @@ const getTransactions = async (req, res) => {
 const addTransaction = async (req, res) => {
   const { title, amount, type, category, date, note } = req.body;
 
+  // Validate required string fields to guard against object injection
+  if (!isString(title) || !isString(type)) {
+    return res.status(400).json({ message: 'Invalid input' });
+  }
+
   try {
     const transaction = await Transaction.create({
       user: req.user._id,
-      title,
+      title: String(title).trim(),
       amount,
       type,
       category,
       date: date || Date.now(),
-      note,
+      note: note ? String(note).trim() : '',
     });
 
     res.status(201).json(transaction);
@@ -64,7 +72,9 @@ const addTransaction = async (req, res) => {
 // @access Private
 const updateTransaction = async (req, res) => {
   try {
-    const transaction = await Transaction.findById(req.params.id);
+    // Coerce id to string to avoid object injection
+    const id = String(req.params.id);
+    const transaction = await Transaction.findById(id);
 
     if (!transaction) {
       return res.status(404).json({ message: 'Transaction not found' });
@@ -76,7 +86,7 @@ const updateTransaction = async (req, res) => {
     }
 
     const updated = await Transaction.findByIdAndUpdate(
-      req.params.id,
+      id,
       req.body,
       { new: true, runValidators: true }
     );
@@ -92,7 +102,9 @@ const updateTransaction = async (req, res) => {
 // @access Private
 const deleteTransaction = async (req, res) => {
   try {
-    const transaction = await Transaction.findById(req.params.id);
+    // Coerce id to string to avoid object injection
+    const id = String(req.params.id);
+    const transaction = await Transaction.findById(id);
 
     if (!transaction) {
       return res.status(404).json({ message: 'Transaction not found' });
