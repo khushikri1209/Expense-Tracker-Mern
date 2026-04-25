@@ -21,9 +21,11 @@ const apiLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Apply rate limiter before auth middleware
+router.use(apiLimiter);
+
 // All routes require authentication
 router.use(protect);
-router.use(apiLimiter);
 
 router.get('/summary', getSummary);
 router.route('/').get(getTransactions).post(addTransaction);

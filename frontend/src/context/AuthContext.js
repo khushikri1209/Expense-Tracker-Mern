@@ -5,15 +5,24 @@ import api from '../utils/api';
 
 const AuthContext = createContext();
 
+// Safely parse stored user data, returning null on any parse error
+const getStoredUser = () => {
+  try {
+    return JSON.parse(localStorage.getItem('user') || 'null');
+  } catch {
+    return null;
+  }
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // On mount: restore user from localStorage if token is saved
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
+    const savedUser = getStoredUser();
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      setUser(savedUser);
     }
     setLoading(false);
   }, []);

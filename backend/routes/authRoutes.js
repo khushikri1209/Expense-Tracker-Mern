@@ -17,6 +17,6 @@ const authLimiter = rateLimit({
 
 router.post('/register', authLimiter, registerUser);
 router.post('/login', authLimiter, loginUser);
-router.get('/me', protect, getMe); // Protected route
+router.get('/me', authLimiter, protect, getMe); // Protected route
 
 module.exports = router;

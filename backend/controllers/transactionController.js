@@ -23,12 +23,17 @@ const getTransactions = async (req, res) => {
     // Optional: date range filter
     if (startDate || endDate) {
       filter.date = {};
-      if (startDate) filter.date.$gte = new Date(startDate);
+      if (startDate) {
+        const start = new Date(String(startDate));
+        if (!isNaN(start.getTime())) filter.date.$gte = start;
+      }
       if (endDate) {
         // Include the entire end date by setting time to end of day
-        const end = new Date(endDate);
-        end.setHours(23, 59, 59, 999);
-        filter.date.$lte = end;
+        const end = new Date(String(endDate));
+        if (!isNaN(end.getTime())) {
+          end.setHours(23, 59, 59, 999);
+          filter.date.$lte = end;
+        }
       }
     }
 
